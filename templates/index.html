@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Mensajería de Miguel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:linear-gradient(135deg,#1c1b29,#4b2c5e);
+      color:#fff;
+      display:flex;
+      min-height:100vh;
+      justify-content:center;
+      align-items:center;
+      padding:16px;
+    }
+    .card{
+      background:rgba(0,0,0,0.38);
+      border-radius:18px;
+      padding:26px;
+      max-width:560px;
+      width:100%;
+      box-shadow:0 22px 50px rgba(0,0,0,0.45);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    h1{margin:0;font-size:2rem;text-align:center;}
+    h1 span{color:#ff9bd2;}
+    p.sub{margin:8px 0 0;text-align:center;font-size:0.95rem;opacity:0.85;}
+
+    .section-title{
+      margin-top:18px;
+      font-size:0.92rem;
+      font-weight:750;
+      text-transform:uppercase;
+      letter-spacing:0.09em;
+      opacity:0.92;
+    }
+    .buttons{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    button{
+      border:none;
+      border-radius:999px;
+      padding:11px 14px;
+      font-size:0.95rem;
+      cursor:pointer;
+      background:#ff9bd2;
+      color:#2a1430;
+      font-weight:800;
+    }
+    .output{
+      margin-top:10px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.07);
+    }
+    textarea{
+      width:100%;
+      border-radius:14px;
+      padding:12px;
+      border:none;
+      resize:vertical;
+      min-height:78px;
+      font-family:inherit;
+      font-size:0.96rem;
+      outline:none;
+      background:rgba(255,255,255,0.92);
+      color:#1a1a1a;
+    }
+
+    .emoji-row{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    .emoji-panel{
+      width:100%;
+      background:rgba(0,0,0,0.35);
+      border-radius:14px;
+      padding:10px;
+      border:1px solid rgba(255,255,255,0.10);
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:center;
+    }
+    .emoji-panel span{font-size:1.35rem;cursor:pointer;padding:2px 4px;border-radius:8px;user-select:none;}
+
+    /* === CHAT === */
+    #chatWrap{
+      margin-top:12px;
+      height:360px;
+      overflow-y:auto;
+      padding:10px;
+      border-radius:14px;
+      background:rgba(0,0,0,0.25);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .day-sep{text-align:center;font-size:0.78rem;opacity:0.85;margin:10px 0;}
+    .row-msg{display:flex;margin:6px 0;}
+    .row-msg.me{justify-content:flex-end;}
+    .row-msg.other{justify-content:flex-start;}
+
+    .bubble{
+      max-width:80%;
+      padding:10px 12px;
+      border-radius:14px;
+      line-height:1.35;
+      font-size:0.95rem;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.08);
+      color:#fff;
+    }
+
+    /* ===== TUS 5 COLORES (RELLENO COMPLETO) ===== */
+    .me.theme-morado .bubble { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+    .me.theme-cielo  .bubble { background:#38bdf8; border-color:#38bdf8; color:#0b1220; }
+    .me.theme-rosa   .bubble { background:#ff4da6; border-color:#ff4da6; color:#0b1220; }
+    .me.theme-verde  .bubble { background:#22c55e; border-color:#22c55e; color:#0b1220; }
+    .me.theme-negro  .bubble { background:#111827; border-color:#111827; color:#fff; }
+
+    .meta{
+      font-size:0.72rem;
+      opacity:0.75;
+      margin-top:6px;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    /* selector color */
+    .theme-picker{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      justify-content:space-between;
+    }
+    .chip{
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:0.82rem;
+      background:rgba(255,255,255,0.08);
+      border:1px solid rgba(255,255,255,0.14);
+      cursor:pointer;
+      user-select:none;
+      opacity:0.9;
+    }
+    .chip.active{outline:2px solid rgba(255,255,255,0.55);}
+
+    .small-text{font-size:0.82rem;opacity:0.78;margin-top:8px;}
+    .footer{margin-top:18px;font-size:0.75rem;text-align:center;opacity:0.7;}
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1><span>Mensajería</span> de Miguel</h1>
+    <p class="sub">Elige un mood y escribe lo que quieras</p>
+
+    <div>
+      <div class="section-title">1. Elige una emoción</div>
+      <form method="post">
+        <div class="buttons">
+          <button type="submit" name="emocion" value="ternura">Ternura 😌</button>
+          <button type="submit" name="emocion" value="risa">Risa 😄</button>
+          <button type="submit" name="emocion" value="picante">Picante 😏</button>
+          <button type="submit" name="emocion" value="sorpresa">Sorpresa ✨</button>
+        </div>
+      </form>
+
+      {% if frase_generada %}
+        <div class="output">
+          <b>Mensaje generado:</b> {{ frase_generada }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="section-title">Color de tus mensajes</div>
+    <div class="theme-picker" id="themePicker">
+      <div class="chip" data-theme="theme-morado">Morado</div>
+      <div class="chip" data-theme="theme-cielo">Azul cielo</div>
+      <div class="chip" data-theme="theme-rosa">Rosa</div>
+      <div class="chip" data-theme="theme-verde">Verde</div>
+      <div class="chip" data-theme="theme-negro">Negro</div>
+    </div>
+
+    <div class="section-title">2. Chat (historial)</div>
+    <div id="chatWrap"></div>
+
+    <form method="post" style="margin-top:12px;">
+      <textarea id="msgInput" name="pregunta" placeholder="Escribe aquí tu mensaje..."></textarea>
+
+      <div class="emoji-row">
+        <div class="emoji-panel">
+          <span onclick="addEmoji('😀')">😀</span><span onclick="addEmoji('😄')">😄</span>
+          <span onclick="addEmoji('😉')">😉</span><span onclick="addEmoji('😏')">😏</span>
+          <span onclick="addEmoji('😍')">😍</span><span onclick="addEmoji('😂')">😂</span>
+          <span onclick="addEmoji('🤔')">🤔</span><span onclick="addEmoji('😎')">😎</span>
+          <span onclick="addEmoji('🥰')">🥰</span><span onclick="addEmoji('😅')">😅</span>
+          <span onclick="addEmoji('🙃')">🙃</span><span onclick="addEmoji('❤️')">❤️</span>
+          <span onclick="addEmoji('🖤')">🖤</span><span onclick="addEmoji('💘')">💘</span>
+          <span onclick="addEmoji('✨')">✨</span><span onclick="addEmoji('🔥')">🔥</span>
+        </div>
+        <div style="opacity:0.75;font-size:0.82rem;">Emojis</div>
+      </div>
+
+      <div style="margin-top:10px;text-align:right;">
+        <button type="submit">Enviar</button>
+      </div>
+    </form>
+
+    <div class="small-text">
+      *Desliza hacia arriba para ver mensajes viejos.
+    </div>
+
+    <div class="footer">
+      Hecho por Miguel · Python & Flask
+    </div>
+  </div>
+
+<script>
+  function addEmoji(emoji) {
+    const input = document.getElementById("msgInput");
+    input.value += emoji;
+    input.focus();
+  }
+
+  const chatWrap = document.getElementById("chatWrap");
+  const themePicker = document.getElementById("themePicker");
+
+  // ===== THEME (ELLA) =====
+  let myTheme = localStorage.getItem("ella_theme") || "theme-rosa"; // default para ella
+
+  function setActiveChip(){
+    [...themePicker.querySelectorAll(".chip")].forEach(c=>{
+      c.classList.toggle("active", c.dataset.theme === myTheme);
+    });
+  }
+  themePicker.addEventListener("click",(e)=>{
+    const chip = e.target.closest(".chip");
+    if(!chip) return;
+    myTheme = chip.dataset.theme;
+    localStorage.setItem("ella_theme", myTheme);
+    setActiveChip();
+    // re-render sin borrar todo: solo actualizamos clases existentes
+    repaintThemes();
+  });
+  setActiveChip();
+
+  // ===== STATE =====
+  let page = 0;
+  let loading = false;
+  let reachedEnd = false;
+  let lastId = 0; // el mayor id que ya tenemos
+  const knownIds = new Set(); // para evitar duplicados
+
+  function fmtTime(iso){
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  function fmtDateKey(iso){
+    const d = new Date(iso);
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,'0');
+    const day=String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function repaintThemes(){
+    // actualiza solo los mensajes "me" (ella) sin tocar el DOM completo
+    [...chatWrap.querySelectorAll(".row-msg.me")].forEach(row=>{
+      row.classList.remove("theme-morado","theme-cielo","theme-rosa","theme-verde","theme-negro");
+      row.classList.add(myTheme);
+    });
+  }
+
+  function appendMessages(msgs){
+    // msgs vienen en orden viejo->nuevo
+    const frag = document.createDocumentFragment();
+    let lastSepKey = chatWrap.getAttribute("data-last-date") || "";
+
+    msgs.forEach(m=>{
+      if(!m || !m.id) return;
+      if(knownIds.has(m.id)) return;
+      knownIds.add(m.id);
+
+      if(m.id > lastId) lastId = m.id;
+
+      const dk = fmtDateKey(m.created_at);
+      if(dk !== lastSepKey){
+        const sep = document.createElement("div");
+        sep.className = "day-sep";
+        sep.textContent = dk;
+        frag.appendChild(sep);
+        lastSepKey = dk;
+        chatWrap.setAttribute("data-last-date", dk);
+      }
+
+      const row = document.createElement("div");
+      const isMe = (m.de === "ella"); // en vista de ella, "ella" es yo
+      row.className = "row-msg " + (isMe ? `me ${myTheme}` : "other");
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = m.texto;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = fmtTime(m.created_at);
+
+      const wrap = document.createElement("div");
+      wrap.appendChild(bubble);
+      wrap.appendChild(meta);
+
+      row.appendChild(wrap);
+      frag.appendChild(row);
+    });
+
+    chatWrap.appendChild(frag);
+  }
+
+  function prependMessages(msgs){
+    // prepend: msgs vienen viejo->nuevo, pero los vamos a insertar al inicio conservando orden
+    const beforeHeight = chatWrap.scrollHeight;
+    const beforeTop = chatWrap.scrollTop;
+
+    const frag = document.createDocumentFragment();
+    let firstExistingSep = chatWrap.querySelector(".day-sep");
+    let existingFirstKey = firstExistingSep ? firstExistingSep.textContent.trim() : null;
+
+    let lastDate = null;
+
+    msgs.forEach(m=>{
+      if(!m || !m.id) return;
+      if(knownIds.has(m.id)) return;
+      knownIds.add(m.id);
+
+      if(m.id > lastId) lastId = m.id;
+
+      const dk = fmtDateKey(m.created_at);
+      if(dk !== lastDate){
+        // evita duplicar el separador si coincide con el primero existente
+        if(!(existingFirstKey && dk === existingFirstKey)){
+          const sep = document.createElement("div");
+          sep.className = "day-sep";
+          sep.textContent = dk;
+          frag.appendChild(sep);
+        }
+        lastDate = dk;
+      }
+
+      const row = document.createElement("div");
+      const isMe = (m.de === "ella");
+      row.className = "row-msg " + (isMe ? `me ${myTheme}` : "other");
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = m.texto;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = fmtTime(m.created_at);
+
+      const wrap = document.createElement("div");
+      wrap.appendChild(bubble);
+      wrap.appendChild(meta);
+
+      row.appendChild(wrap);
+      frag.appendChild(row);
+    });
+
+    if(frag.childNodes.length){
+      chatWrap.prepend(frag);
+      // mantener vista estable
+      const afterHeight = chatWrap.scrollHeight;
+      chatWrap.scrollTop = (afterHeight - beforeHeight) + beforeTop;
+    }
+  }
+
+  async function loadPage(p){
+    if(loading || reachedEnd) return;
+    loading = true;
+    try{
+      const res = await fetch(`{{ chat_url }}?page=${p}`);
+      const data = await res.json();
+      const msgs = data.mensajes || [];
+      if(msgs.length === 0){
+        reachedEnd = true;
+        loading = false;
+        return;
+      }
+      if(p === 0){
+        appendMessages(msgs);
+        chatWrap.scrollTop = chatWrap.scrollHeight; // bajar al final
+      }else{
+        prependMessages(msgs);
+      }
+    }catch(e){
+      console.log("Error:", e);
+    }
+    loading = false;
+  }
+
+  async function pollNew(){
+    // solo si estás abajo
+    const atBottom = (chatWrap.scrollHeight - chatWrap.scrollTop - chatWrap.clientHeight) < 20;
+    if(!atBottom) return;
+
+    try{
+      const res = await fetch(`{{ chat_url }}?after_id=${lastId}`);
+      const data = await res.json();
+      const msgs = data.mensajes || [];
+      if(msgs.length){
+        appendMessages(msgs);
+        chatWrap.scrollTop = chatWrap.scrollHeight;
+      }
+    }catch(e){
+      console.log("poll error:", e);
+    }
+  }
+
+  // inicial
+  loadPage(0);
+
+  // scroll arriba = cargar viejos
+  chatWrap.addEventListener("scroll", async ()=>{
+    if(chatWrap.scrollTop <= 5 && !loading && !reachedEnd){
+      page += 1;
+      await loadPage(page);
+    }
+  });
+
+  // polling sin parpadeo
+  setInterval(pollNew, 1500);
+</script>
+
+</body>
+</html>
